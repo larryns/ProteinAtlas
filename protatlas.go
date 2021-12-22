@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-// Type for extracting the data we need. Struct fields mus tstart with upper case letter (exported)
+// XML definitions for the entries. The XML data format from proteinatlas contains the most information of all the formats you can download.
 type ProteinAtlas struct {
 	Entry Entry `xml:"entry"`
 }
@@ -45,16 +45,6 @@ type CellTypeSpecificity struct {
 }
 
 func main() {
-	// Open our xmlFile
-	xmlFile, err := os.Open("/Users/singhln/Downloads/ENSG00000078328.xml")
-	// if we os.Open returns an error then handle it
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	// defer the closing of our xmlFile so that we can parse it later on
-	defer xmlFile.Close()
-
 	// argument flags, read in a file, default called genes.txt
 	wordPtr := flag.String("file", "genes.txt", "input file name")
 	flag.Parse()
@@ -63,6 +53,7 @@ func main() {
 	symbols := readSymbols(wordPtr)
 
 	// The data to pass gene symbols to the REST api. Values is a map indexed by string to a list of strings.
+	// We're using JSON to retrieve the Ensembl id's from ensembl.org corresponding to the gene symbols.
 	data := url.Values{"symbols": symbols}
 
 	// Marshal performs a JSON encoding of data.
