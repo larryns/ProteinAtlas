@@ -1,3 +1,3 @@
 # ProteinAtlas
 
-Code to read a file with gene names and query Ensembl for the gene id, then ProteinAtlas for the cell and tissue information.
+ProteinAtlas is a small program I wrote that takes a list of genes from a file entered on the command line (default file is genes.txt) and retrieves information from the prtoeinatlas website.
