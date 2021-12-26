@@ -1,7 +1,5 @@
 package main
 
-// This version looks for the corresponding human orthologue given a pig gene ensembl gene id. Then using the human orthologue, we look up the information
-// Protein Atlas.
 import (
 	"bufio"
 	"encoding/json"
@@ -68,6 +66,9 @@ func main() {
 	// read a file of symbols and return a symbol string
 	symbols := readSymbols(wordPtr)
 
+	// Print the header
+	fmt.Println("Id\tSymbol\tTissue Specificity\tSingle cell type specificity\tSingle cell type expression cluster\tImmune cell specificity\tBrain specificity")
+
 	// Create a client for the REST API.
 	for _, id := range symbols {
 		if len(id) == 0 {
@@ -84,12 +85,13 @@ func main() {
 		var orthologue Response
 		json.Unmarshal(data, &orthologue)
 
-		fmt.Println(id)
+		fmt.Print(id)
 		for _, data := range orthologue.Data {
 			for _, homology := range data.Homologies {
 				protAtlas(id, homology.Target.Id)
 			}
 		}
+		fmt.Print("\n")
 	}
 
 }
@@ -134,27 +136,24 @@ func protAtlas(symbol string, id string) {
 	xml.Unmarshal(dat, &entry)
 
 	// Now format and print the output
-	fmt.Println(entry.Entry.Name)
-	fmt.Printf("\tTissue specificity: ")
+	// First print the header
+	fmt.Print("\t" + entry.Entry.Name + "\t")
 	for _, e := range entry.Entry.RNAExpr {
 		if e.AssayType == "consensusTissue" {
-			fmt.Println(strings.Join(e.RNASpecificity.Tissue, ", "))
+			fmt.Print(strings.Join(e.RNASpecificity.Tissue, ", "))
 		}
 	}
-	fmt.Printf("\tSingle cell type specificity: ")
-	fmt.Println(strings.Join(entry.Entry.CellTypeExpr.CellTypeSpecificity.CellType, ","))
-	fmt.Printf("\tSingle cell type expression cluster: ")
-	fmt.Println(entry.Entry.CellTypeExpr.CellTypeExprCluster)
-	fmt.Printf("\tImmune cell specificity: ")
+	fmt.Print("\t" + strings.Join(entry.Entry.CellTypeExpr.CellTypeSpecificity.CellType, ","))
+	fmt.Print("\t" + entry.Entry.CellTypeExpr.CellTypeExprCluster)
 	for _, e := range entry.Entry.RNAExpr {
 		if e.AssayType == "immuneCell" {
-			fmt.Println(e.RNASpecificity.Specificity)
+			fmt.Print("\t" + e.RNASpecificity.Specificity)
 		}
 	}
-	fmt.Printf("\tBrain specificity: ")
+	fmt.Print("\t")
 	for _, e := range entry.Entry.RNAExpr {
 		if e.AssayType == "humanBrainRegional" {
-			fmt.Println(e.RNASpecificity.Specificity)
+			fmt.Print(e.RNASpecificity.Specificity)
 		}
 	}
 }
